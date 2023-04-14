@@ -1,14 +1,45 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { getTickets, postTickets } from './ticketsThunk';
+import { TicketsListTableItemVM } from '../tables/TicketsListTable';
+export interface TicketsState {
+    tickets: TicketsListTableItemVM[];
+    loading: null | 'loading' | 'succeeded' | 'failed';
+}
 
-const initialState = {};
+const initialState = {
+    tickets: [],
+    loading: null,
+} as TicketsState;
 
 export const ticketsSlice = createSlice({
     name: 'tickets',
     initialState,
-    reducers: {
-        fn: (state) => {
-            // implement the reducers
-        },
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            .addCase(getTickets.pending, (state: TicketsState) => {
+                state.loading = 'loading';
+            })
+            .addCase(
+                getTickets.fulfilled,
+                (state: TicketsState, action: PayloadAction<TicketsListTableItemVM[]>) => {
+                    state.loading = 'succeeded';
+                    state.tickets = action.payload;
+                }
+            )
+            .addCase(getTickets.rejected, (state: TicketsState) => {
+                state.loading = 'failed';
+            })
+            .addCase(postTickets.pending, (state: TicketsState) => {
+                state.loading = 'loading';
+            })
+            .addCase(postTickets.fulfilled, (state: TicketsState) => {
+                state.loading = 'succeeded';
+            })
+            .addCase(postTickets.rejected, (state: TicketsState) => {
+                state.loading = 'failed';
+            })
+            .addDefaultCase((state, action) => {});
     },
 });
 

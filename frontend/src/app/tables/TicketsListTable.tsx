@@ -6,7 +6,7 @@ export interface TicketsListTableItemVM {
     email: string;
     title: string;
     description: string;
-    price: string;
+    price: number;
     amount: number;
     supplier: string;
 }

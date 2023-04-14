@@ -1,3 +1,5 @@
+import './wdyr'; // added for app performance profiling
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';

@@ -1,7 +1,9 @@
 import React from 'react';
 import { FormProps } from '../interfaces/form';
 import { useForm, Controller } from 'react-hook-form';
-import { Grid, Input, Textarea, Button, createStyles } from '@mantine/core';
+import { Grid, TextInput, Textarea, Button, createStyles } from '@mantine/core';
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FormLabel } from '../../view/components/Forms/FormLabel';
 
 const useStyles = createStyles((theme) => ({
@@ -16,7 +18,7 @@ export interface AddTicketsFormValues {
     email: string;
     title: string;
     description: string;
-    price: string;
+    price: number;
     amount: number;
     supplier: string;
 }
@@ -25,14 +27,30 @@ const defaultValues: AddTicketsFormValues = {
     email: '',
     title: '',
     description: '',
-    price: '',
+    price: 1,
     amount: 1,
     supplier: '',
 };
 
+const schema = yup.object().shape({
+    email: yup.string().email().required(),
+    title: yup.string().min(2).required(),
+    description: yup.string().min(8).required(),
+    price: yup.number().typeError('Price must be a number').required().positive(),
+    amount: yup.number().integer().typeError('Amount must be a number').required().positive(),
+    supplier: yup.string().required(),
+});
+
 export const AddTicketsForm = ({ onSubmit }: FormProps<AddTicketsFormValues>) => {
-    const { control, handleSubmit } = useForm<AddTicketsFormValues>({ defaultValues });
+    const { control, handleSubmit, formState: { errors }, reset } = useForm<AddTicketsFormValues>({
+        defaultValues,
+        resolver: yupResolver(schema),
+    });
     const { classes } = useStyles();
+    const handleFormSubmit = (values: AddTicketsFormValues) => {
+        onSubmit(values)
+        reset()
+    }
 
     return (
         <Grid>
@@ -44,7 +62,13 @@ export const AddTicketsForm = ({ onSubmit }: FormProps<AddTicketsFormValues>) =>
                         return (
                             <>
                                 <FormLabel>Email</FormLabel>
-                                <Input onChange={onChange} value={value} name={name} />
+                                <TextInput
+                                    onChange={onChange}
+                                    value={value}
+                                    name={name}
+                                    placeholder='email'
+                                    error={errors.email?.message}
+                                />
                             </>
                         );
                     }}
@@ -58,7 +82,13 @@ export const AddTicketsForm = ({ onSubmit }: FormProps<AddTicketsFormValues>) =>
                         return (
                             <>
                                 <FormLabel>Title</FormLabel>
-                                <Input onChange={onChange} value={value} name={name} />
+                                <TextInput
+                                    onChange={onChange}
+                                    value={value}
+                                    name={name}
+                                    error={errors.title?.message}
+                                    placeholder='title'
+                                />
                             </>
                         );
                     }}
@@ -72,7 +102,13 @@ export const AddTicketsForm = ({ onSubmit }: FormProps<AddTicketsFormValues>) =>
                         return (
                             <>
                                 <FormLabel>Description</FormLabel>
-                                <Textarea onChange={onChange} value={value} name={name} />
+                                <Textarea
+                                    onChange={onChange}
+                                    value={value}
+                                    name={name}
+                                    placeholder='description'
+                                    error={errors.description?.message}
+                                />
                             </>
                         );
                     }}
@@ -86,11 +122,13 @@ export const AddTicketsForm = ({ onSubmit }: FormProps<AddTicketsFormValues>) =>
                         return (
                             <>
                                 <FormLabel>Price</FormLabel>
-                                <Input
+                                <TextInput
                                     type="number"
                                     onChange={onChange}
                                     value={value}
                                     name={name}
+                                    placeholder='price: 0'
+                                    error={errors.price?.message}
                                 />
                             </>
                         );
@@ -105,11 +143,13 @@ export const AddTicketsForm = ({ onSubmit }: FormProps<AddTicketsFormValues>) =>
                         return (
                             <>
                                 <FormLabel>Amount of tickets</FormLabel>
-                                <Input
+                                <TextInput
                                     type="number"
                                     onChange={onChange}
                                     value={value}
                                     name={name}
+                                    placeholder='amount: 0'
+                                    error={errors.amount?.message}
                                 />
                             </>
                         );
@@ -124,14 +164,20 @@ export const AddTicketsForm = ({ onSubmit }: FormProps<AddTicketsFormValues>) =>
                         return (
                             <>
                                 <FormLabel>Supplier</FormLabel>
-                                <Input onChange={onChange} value={value} name={name} />
+                                <TextInput
+                                    onChange={onChange}
+                                    value={value}
+                                    name={name}
+                                    placeholder='supplier'
+                                    error={errors.supplier?.message}
+                                />
                             </>
                         );
                     }}
                 />
             </Grid.Col>
             <Grid.Col span={12} className={classes.buttonContainer}>
-                <Button onClick={handleSubmit(onSubmit)}>Add tickets</Button>
+                <Button onClick={handleSubmit(handleFormSubmit)}>Add tickets</Button>
             </Grid.Col>
         </Grid>
     );
